@@ -1,17 +1,38 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import ReactDOM from "react-dom";
+import React, { Component } from "react";
+import DragDrop from 'editorjs-drag-drop';
+import EditorJs from "react-editor-js";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import { EDITOR_JS_TOOLS } from "./constants";
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+class ReactEditor extends Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state ={ data: {}, isFetching: true, error: null };
+    }
+
+    componentDidMount() {
+        fetch('http://localhost:8080/')
+            .then(response => response.json())
+            .then(result => this.setState({data: result}))
+            .catch(e => console.log(e));
+    }
+
+    render() {
+        return (
+            <EditorJs
+                instanceRef={instance => this.editorInstance = instance}
+                onReady={() => {
+                    new DragDrop(this.editorInstance)
+                }}
+                tools={EDITOR_JS_TOOLS}
+                data={this.state.data}
+                enableReInitialize={true}
+            />
+        );
+    }
+}
+
+ReactDOM.render(<ReactEditor />, document.getElementById("root"));
